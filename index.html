@@ -699,15 +699,53 @@
     transform: rotate(180deg);
   }
 
-  #video-frame  { top: 6100px; left: 71px;  width: 336px; z-index: 3; }
+  #video-frame  {
+    top: 6100px; left: 71px;  width: 336px; z-index: 3;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* true circle at the previous (good) width of the frame opening */
   #video-inner  {
     position: absolute;
-    top: 21%; left: 16%; width: 68%; height: 58%;
+    top: 50%;
+    left: 50%;
+    width: 68%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    transform: translate(-50%, -50%);
     border-radius: 50%;
-    background: radial-gradient(circle at 40% 35%, #2b2f36, #0c0d10 75%);
-    display: flex; align-items: center; justify-content: center;
-    color: rgba(255,255,255,.55);
+    overflow: hidden;
+    background: #0c0d10;
+  }
+  #surprise-video {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 50%;
+    background: #0c0d10;
+  }
+  #video-play-btn {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    border-radius: 50%;
+    background: rgba(12, 13, 16, 0.28);
+    color: rgba(255, 255, 255, 0.9);
     font-size: 34px;
+    line-height: 1;
+    cursor: pointer;
+    transition: opacity 0.25s ease;
+  }
+  #video-frame.is-playing #video-play-btn {
+    opacity: 0;
+    pointer-events: none;
   }
 
   #footer-friends { top: 6440px; left: 4px; width: 480px; z-index: 2; }
@@ -844,9 +882,14 @@
     </div>
   </div>
 
-  <div class="el shadow" id="video-frame">
+  <div class="el shadow" id="video-frame" role="button" tabindex="0" aria-label="Смотреть видео-поздравление">
     <img src="denis_assests/video.webp" alt="">
-    <div id="video-inner">▶</div>
+    <div id="video-inner">
+      <video id="surprise-video" playsinline webkit-playsinline preload="auto">
+        <source src="denis_assests/surprise.mp4" type="video/mp4">
+      </video>
+      <button type="button" id="video-play-btn" aria-label="Play">▶</button>
+    </div>
   </div>
 
   <div class="el" id="footer-friends">
@@ -910,6 +953,9 @@
     music.preload = 'auto';
     music.loop = true;
     music.src = MUSIC_SRC;
+    window.__cardMusic = music;
+
+    var surpriseVideo = document.getElementById('surprise-video');
 
     if (bar) {
       for (var s = 0; s < SEGMENTS; s++) {
@@ -931,7 +977,7 @@
     });
 
     var list = Object.keys(urls);
-    var total = list.length + 1; // images + music
+    var total = list.length + 2; // images + music + video
     var done = 0;
     var revealed = false;
     var loadComplete = false;
@@ -1065,6 +1111,20 @@
     music.addEventListener('error', finishMusic);
     try { music.load(); } catch (e) { finishMusic(); }
 
+    var videoSettled = false;
+    function finishVideo() {
+      if (videoSettled) return;
+      videoSettled = true;
+      tick();
+    }
+    if (surpriseVideo) {
+      surpriseVideo.addEventListener('canplaythrough', finishVideo);
+      surpriseVideo.addEventListener('error', finishVideo);
+      try { surpriseVideo.load(); } catch (e) { finishVideo(); }
+    } else {
+      finishVideo();
+    }
+
     // safety net — unlock Done even if something hangs
     setTimeout(function () {
       if (!loadComplete) {
@@ -1073,6 +1133,77 @@
         readyToOpen();
       }
     }, 45000);
+  })();
+
+  // Circular surprise video: pause birthday music while it plays
+  (function setupSurpriseVideo() {
+    var frame = document.getElementById('video-frame');
+    var video = document.getElementById('surprise-video');
+    var playBtn = document.getElementById('video-play-btn');
+    if (!frame || !video) return;
+
+    function bgMusic() {
+      return window.__cardMusic || null;
+    }
+
+    function pauseBgMusic() {
+      var m = bgMusic();
+      if (!m) return;
+      if (!m.paused) {
+        m.__pausedForVideo = true;
+        m.pause();
+      }
+    }
+
+    function resumeBgMusic() {
+      var m = bgMusic();
+      if (!m || !m.__pausedForVideo) return;
+      m.__pausedForVideo = false;
+      m.play().catch(function () {});
+    }
+
+    function playVideo() {
+      pauseBgMusic();
+      var p = video.play();
+      if (p && p.catch) p.catch(function () {});
+    }
+
+    function toggleVideo() {
+      if (video.paused) playVideo();
+      else video.pause();
+    }
+
+    video.addEventListener('play', function () {
+      pauseBgMusic();
+      frame.classList.add('is-playing');
+    });
+    video.addEventListener('pause', function () {
+      frame.classList.remove('is-playing');
+      if (!video.ended) resumeBgMusic();
+    });
+    video.addEventListener('ended', function () {
+      frame.classList.remove('is-playing');
+      video.currentTime = 0;
+      resumeBgMusic();
+    });
+
+    frame.addEventListener('click', function (e) {
+      e.preventDefault();
+      toggleVideo();
+    });
+    frame.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleVideo();
+      }
+    });
+    if (playBtn) {
+      playBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        playVideo();
+      });
+    }
   })();
 
   // Reveal-on-scroll helpers
