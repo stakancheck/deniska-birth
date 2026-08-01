@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>С Днём Рождения, Денис!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: #14161a;
+    min-height: 100%;
+  }
+  body {
+    display: flex;
+    justify-content: center;
+  }
+
+  /*
+    Fixed artboard (480×3936). Everything is laid out in px relative to that
+    canvas, then the whole scene is scaled to the phone width — so relative
+    positions never drift between devices.
+  */
+  #stage {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    overflow: hidden;
+    background: #EDE7D3;
+  }
+
+  #scene {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 480px;
+    height: 3936px;
+    background: #EDE7D3;
+    transform-origin: 0 0;
+  }
+
+  .el {
+    position: absolute;
+    display: block;
+  }
+  .el img { display: block; width: 100%; height: auto; }
+
+  .shadow img, .shadow { filter: drop-shadow(0 6px 14px rgba(0,0,0,.28)); }
+  .shadow-soft img { filter: drop-shadow(0 4px 10px rgba(0,0,0,.18)); }
+
+  /* ---------- background bands ---------- */
+  .band { position: absolute; left: 0; width: 100%; z-index: 0; }
+  .band-check {
+    background-image: url('denis_assests/back_dash.png');
+    background-repeat: repeat-y;
+    background-size: 480px auto;
+  }
+  .band-cream  { background-color: #EDE7D3; }
+  .band-sky    { background-color: #AFC0CE; }
+  .band-cream2 { background-color: #E7E0C4; }
+
+  #band-hero    { top: 0;    height: 720px; }
+  #band-paper   { top: 720px;  height: 826px; }
+  #band-strip   { top: 1000px; height: 394px; }
+  #band-street  { top: 1389px; height: 672px; }
+  #band-artem   { top: 1740px; height: 710px; }
+  #band-final   { top: 2256px; height: 5200px; }
+
+  /* ---------- HERO ---------- */
+  #title       { top: 14px;  left: 43px;  width: 394px; transform: rotate(-2deg); z-index: 5; }
+  #balloons {
+    top: 115px; left: 10px; width: 461px; z-index: 1;
+    transform-origin: 50% 10%;
+    opacity: 0;
+    transform: translate3d(0, 72px, 0) scale(0.55) rotate(-6deg);
+  }
+  #balloons.is-ready {
+    animation:
+      balloons-enter 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+      balloons-sway 3.6s ease-in-out 1.5s infinite;
+  }
+  #denis-photo {
+    top: 236px; left: 76px; width: 350px; z-index: 4;
+    transform-origin: 50% 100%;
+    transform: rotate(2deg);
+    animation: denis-sway 4.2s ease-in-out infinite;
+  }
+
+  @keyframes balloons-enter {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 72px, 0) scale(0.55) rotate(-6deg);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) scale(1) rotate(-2.2deg);
+    }
+  }
+
+  @keyframes balloons-sway {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1) rotate(-2.2deg); }
+    50%      { transform: translate3d(0, 0, 0) scale(1) rotate(2.2deg); }
+  }
+
+  @keyframes denis-sway {
+    0%, 100% { transform: rotate(0.6deg); }
+    50%      { transform: rotate(3.4deg); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #balloons,
+    #balloons.is-ready,
+    #denis-photo,
+    #cake,
+    #cake.is-in,
+    #hb-letters,
+    #hb-letters.is-in,
+    #cat-gifts,
+    #cat-blue-hat,
+    #chihuahua,
+    #monkey-flowers,
+    #star-badge,
+    #star-badge.is-in,
+    #cat-sunglasses,
+    #cat-sunglasses.is-in,
+    #message,
+    #message.is-in,
+    #disco-lamp,
+    #disco-lamp.is-in {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+    #hb-letters { transform: rotate(-1deg); }
+    #cat-gifts { transform: rotate(-8deg); }
+    #cat-blue-hat { transform: rotate(9deg); }
+    #chihuahua { transform: rotate(6deg); }
+    #monkey-flowers { transform: rotate(-4deg); }
+    #star-badge { transform: rotate(-12deg); }
+    #cat-sunglasses { transform: rotate(6deg); }
+    #message { transform: rotate(3deg); }
+    #disco-lamp { transform: rotate(-4deg); }
+    #guf-guy .guf-mouth,
+    #guf-guy.is-talking .guf-mouth,
+    #guf-guy.is-pulse { animation: none; }
+    #filmstrip1 .filmstrip-hint-hand { animation: none; opacity: 0.85; }
+  }
+
+  /* ---------- CAKE ---------- */
+  #paper-top       { top: 627px; left: -38px; width: 550px; z-index: 0; }
+  #cat-gifts {
+    top: 634px; left: -37px; width: 170px; z-index: 3;
+    --r: -8deg;
+    transform-origin: 50% 70%;
+    animation: critter-tremble 0.28s ease-in-out infinite;
+  }
+  #cake {
+    top: 695px; left: 96px; width: 300px; z-index: 10;
+    transform-origin: 50% 80%;
+    opacity: 0;
+    transform: translate3d(0, 56px, 0) scale(0.35);
+  }
+  #cake.is-in {
+    animation: cake-pop 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  #cat-blue-hat {
+    top: 630px; left: 375px; width: 130px; z-index: 3;
+    --r: 9deg;
+    transform-origin: 50% 70%;
+    animation: critter-tremble 0.32s ease-in-out 0.05s infinite;
+  }
+  #hb-letters {
+    top: 875px; left: 72px; width: 346px; z-index: 11;
+    transform-origin: 50% 50%;
+    opacity: 0;
+    transform: translate3d(0, 28px, 0) scale(0.6) rotate(-8deg);
+  }
+  #hb-letters.is-in {
+    animation: hb-pop 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.28s forwards;
+  }
+  #chihuahua {
+    top: 896px; left: -19px; width: 170px; z-index: 3;
+    --r: 6deg;
+    transform-origin: 50% 80%;
+    animation: critter-tremble 0.26s ease-in-out 0.1s infinite;
+  }
+  #monkey-flowers {
+    top: 977px; left: 341px; width: 154px; z-index: 3;
+    --r: -4deg;
+    transform-origin: 50% 70%;
+    animation: critter-tremble 0.3s ease-in-out 0.16s infinite;
+  }
+
+  @keyframes critter-tremble {
+    0%, 100% {
+      transform: translate3d(0, 0, 0) rotate(var(--r));
+    }
+    25% {
+      transform: translate3d(1.2px, -1px, 0) rotate(calc(var(--r) + 1.1deg));
+    }
+    50% {
+      transform: translate3d(-1px, 0.8px, 0) rotate(calc(var(--r) - 0.9deg));
+    }
+    75% {
+      transform: translate3d(0.8px, 1px, 0) rotate(calc(var(--r) + 0.7deg));
+    }
+  }
+
+  @keyframes cake-pop {
+    0% {
+      opacity: 0;
+      transform: translate3d(0, 56px, 0) scale(0.35);
+    }
+    60% {
+      opacity: 1;
+      transform: translate3d(0, -14px, 0) scale(1.08);
+    }
+    100% {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+  }
+
+  @keyframes hb-pop {
+    0% {
+      opacity: 0;
+      transform: translate3d(0, 28px, 0) scale(0.6) rotate(-8deg);
+    }
+    65% {
+      opacity: 1;
+      transform: translate3d(0, -6px, 0) scale(1.06) rotate(2deg);
+    }
+    100% {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) scale(1) rotate(-1deg);
+    }
+  }
+
+  /* ---------- FILM STRIP 1 ---------- */
+  #filmstrip1 {
+    top: 1088px; left: 0; width: 480px; height: 254px; z-index: 2;
+    overflow: hidden;
+    touch-action: pan-y;
+    cursor: grab;
+  }
+  #filmstrip1.is-dragging { cursor: grabbing; }
+  #filmstrip1 .filmstrip-track {
+    display: block;
+    width: max-content;
+    height: 100%;
+    will-change: transform;
+    filter: drop-shadow(0 6px 14px rgba(0,0,0,.28));
+  }
+  #filmstrip1 .filmstrip-track img {
+    display: block;
+    width: auto;
+    height: 254px;
+    max-width: none;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  #filmstrip1::before,
+  #filmstrip1::after {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 36px;
+    z-index: 3;
+    pointer-events: none;
+  }
+  #filmstrip1::before {
+    left: 0;
+    background: linear-gradient(90deg, rgba(237,231,211,.95), transparent);
+  }
+  #filmstrip1::after {
+    right: 0;
+    background: linear-gradient(270deg, rgba(237,231,211,.95), transparent);
+  }
+  .filmstrip-hint {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    transition: opacity 0.45s ease;
+  }
+  .filmstrip-hint.is-hidden { opacity: 0; }
+  /* beat .el img { width:100% } — otherwise the hand fills the strip */
+  #filmstrip1 .filmstrip-hint-hand {
+    display: block;
+    width: 68px;
+    height: auto;
+    max-width: none;
+    transform-origin: 8% 10%; /* fingertip ≈ top-left */
+    filter: drop-shadow(0 3px 6px rgba(0,0,0,.3));
+    animation: filmstrip-hint-swipe 2.8s ease-in-out infinite;
+  }
+  /* press → drag left → drag right → lift */
+  @keyframes filmstrip-hint-swipe {
+    0% {
+      opacity: 0;
+      transform: translate3d(0, -4px, 0) scale(1.05);
+    }
+    10% {
+      opacity: 1;
+      transform: translate3d(0, 2px, 0) scale(1);
+    }
+    18% {
+      opacity: 1;
+      transform: translate3d(0, 8px, 0) scale(0.92);
+    }
+    40% {
+      opacity: 1;
+      transform: translate3d(-28px, 8px, 0) scale(0.92);
+    }
+    68% {
+      opacity: 1;
+      transform: translate3d(28px, 8px, 0) scale(0.92);
+    }
+    80% {
+      opacity: 1;
+      transform: translate3d(28px, 2px, 0) scale(1);
+    }
+    90%, 100% {
+      opacity: 0;
+      transform: translate3d(28px, -4px, 0) scale(1.03);
+    }
+  }
+
+  #star-badge {
+    top: 1316px; left: -2px; width: 130px; z-index: 9;
+    /* stay in layout place so IntersectionObserver can see them;
+       off-screen offset lives only inside the enter animation */
+    opacity: 0;
+    transform: rotate(-12deg);
+  }
+  #star-badge.is-in {
+    animation: slide-in-left 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  #cat-sunglasses {
+    top: 1322px; left: 350px; width: 130px; z-index: 9;
+    opacity: 0;
+    transform: rotate(6deg);
+  }
+  #cat-sunglasses.is-in {
+    animation: slide-in-right 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.08s forwards;
+  }
+
+  @keyframes slide-in-left {
+    from {
+      opacity: 0;
+      transform: translate3d(-160px, 0, 0) rotate(-12deg);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) rotate(-12deg);
+    }
+  }
+  @keyframes slide-in-right {
+    from {
+      opacity: 0;
+      transform: translate3d(160px, 0, 0) rotate(6deg);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) rotate(6deg);
+    }
+  }
+
+  /* ---------- SECTION 2 : message / street ---------- */
+  #moscow-bg    { top: 1389px; left: 0;    width: 480px; z-index: 7; }
+  #guf-guy {
+    top: 1506px; left: 6px; width: 168px;
+    transform: rotate(-3deg); z-index: 8;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  #guf-guy.is-pulse {
+    animation: guf-pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes guf-pulse {
+    0%, 100% { filter: drop-shadow(0 6px 14px rgba(0,0,0,.28)); }
+    50% { filter: drop-shadow(0 6px 18px rgba(0,0,0,.4)) brightness(1.04); }
+  }
+  #guf-guy .guf-mouth {
+    position: absolute;
+    left: 83px;
+    top: 73px;
+    width: 24px;
+    height: auto;
+    z-index: 2;
+    filter: none;
+    transform-origin: 50% 20%;
+    animation: none;
+  }
+  #guf-guy.is-talking .guf-mouth {
+    animation: guf-talk 0.42s linear infinite;
+  }
+  @keyframes guf-talk {
+    0%   { transform: translate3d(0, 0, 0); }
+    12%  { transform: translate3d(0, 4px, 0); }
+    28%  { transform: translate3d(0, 0.5px, 0); }
+    40%  { transform: translate3d(0, 5px, 0); }
+    55%  { transform: translate3d(0, 1px, 0); }
+    70%  { transform: translate3d(0, 4.5px, 0); }
+    85%  { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(0, 3px, 0); }
+  }
+  #message {
+    top: 1455px; left: 118px; width: 320px; z-index: 8;
+    transform-origin: 0% 100%;
+    opacity: 0;
+    transform: rotate(93deg) scale(0.15);
+    pointer-events: none;
+  }
+  #message.is-in {
+    animation: message-spin-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  #message .message-text {
+    position: absolute;
+    left: 70px;
+    top: 18px;
+    width: 185px;
+    bottom: 26%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0 6px;
+    text-align: center;
+    white-space: pre-line;
+    font-family: "Rubik", sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 1.28;
+    letter-spacing: 0.01em;
+    color: #1c1c1c;
+    filter: none;
+    opacity: 1;
+    transition: opacity 0.28s ease;
+  }
+  #message .message-text.is-out {
+    opacity: 0;
+  }
+  @keyframes message-spin-in {
+    from {
+      opacity: 0;
+      transform: rotate(93deg) scale(0.15);
+    }
+    to {
+      opacity: 1;
+      transform: rotate(3deg) scale(1);
+    }
+  }
+  #star-lamp    { top: 1652px; left: 381px; width: 150px; z-index: 10; }
+  #disco-lamp {
+    top: 1739px; left: 333px; width: 149px; z-index: 6;
+    transform-origin: 100% 0%;
+    opacity: 0;
+    transform: translate3d(48px, -110px, 0) rotate(22deg);
+  }
+  #disco-lamp.is-in {
+    opacity: 1;
+    animation:
+      disco-enter 0.95s cubic-bezier(0.22, 1, 0.36, 1) both,
+      disco-swing 2.8s ease-in-out 0.95s infinite;
+  }
+  @keyframes disco-enter {
+    from {
+      opacity: 0;
+      transform: translate3d(48px, -110px, 0) rotate(22deg);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) rotate(-4deg);
+    }
+  }
+  /* 0%/100% must match disco-enter's final rotate — otherwise a visible jump */
+  @keyframes disco-swing {
+    0%, 100% { transform: translate3d(0, 0, 0) rotate(-4deg); }
+    25%      { transform: translate3d(0, 0, 0) rotate(-14deg); }
+    75%      { transform: translate3d(0, 0, 0) rotate(8deg); }
+  }
+
+  #artem {
+    top: 1740px; left: 0; width: 480px; z-index: 5;
+    overflow: hidden;
+  }
+  #artem img {
+    width: 100%;
+    height: auto;
+    max-width: none;
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+  }
+
+  /* ---------- SECTION 3 : film feeder / video / footer ---------- */
+  /* Tall scroll runway; pin viewport is faked in JS (transform parent breaks sticky) */
+  #gallery2-section {
+    position: absolute;
+    top: 2080px;
+    left: 0;
+    width: 480px;
+    height: 3800px;
+    z-index: 1;
+    pointer-events: none;
+  }
+  #gallery2-pin {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 480px;
+    height: 700px;
+    /* visible: bobbin may hang below the viewport and appear later on scroll */
+    overflow: visible;
+    will-change: transform;
+  }
+  /* clips film at mid-height of the bobbin so the strip doesn't peek below it */
+  #gallery2-film-clip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 143px; /* ~ half of #kodak-babine height; refined in JS */
+    overflow: hidden;
+    z-index: 1;
+  }
+  #gallery2-films {
+    position: absolute;
+    top: 16px;
+    left: 70px;
+    width: 340px;
+    will-change: transform;
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));
+  }
+  #gallery2-films img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: none;
+  }
+  #kodak-babine {
+    position: absolute;
+    left: 50%;
+    bottom: 0; /* hang distance set in JS so only the top half sits in the viewport */
+    z-index: 6;
+    width: 460px;
+    transform: translateX(-50%);
+    transform-origin: 50% 40%;
+    will-change: transform;
+    filter: drop-shadow(0 10px 18px rgba(0,0,0,.4));
+    pointer-events: none;
+  }
+  #kodak-babine img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: none;
+    transform: rotate(180deg);
+  }
+
+  #video-frame  { top: 6100px; left: 71px;  width: 336px; z-index: 3; }
+  #video-inner  {
+    position: absolute;
+    top: 21%; left: 16%; width: 68%; height: 58%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #2b2f36, #0c0d10 75%);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,.55);
+    font-size: 34px;
+  }
+
+  #footer-friends { top: 6440px; left: 4px; width: 480px; z-index: 2; }
+
+  @media (prefers-reduced-motion: reduce) {
+    #gallery2-section { height: 1600px; }
+    #gallery2-pin { height: 920px !important; transform: none !important; }
+    #gallery2-films { transform: translate3d(0, -200px, 0) !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+<div id="scene">
+
+  <!-- background bands -->
+  <div class="band band-check" id="band-hero"></div>
+  <div class="band band-cream" id="band-paper"></div>
+  <div class="band band-check" id="band-strip"></div>
+  <div class="band band-sky"  id="band-street"></div>
+  <div class="band band-cream2" id="band-artem"></div>
+  <div class="band band-check" id="band-final"></div>
+
+  <!-- HERO -->
+  <div class="el shadow" id="title">
+    <img src="denis_assests/denis_title.png" alt="DENIS">
+  </div>
+  <div class="el" id="balloons">
+    <img src="denis_assests/NUMBERS.png" alt="20">
+  </div>
+  <div class="el shadow" id="denis-photo">
+    <img src="denis_assests/DENIS.png" alt="Денис">
+  </div>
+
+  <!-- CAKE -->
+  <div class="el" id="paper-top">
+    <img src="denis_assests/paper_back.png" alt="">
+  </div>
+  <div class="el shadow-soft" id="cat-gifts">
+    <img src="denis_assests/animal_1.png" alt="">
+  </div>
+  <div class="el shadow" id="cake">
+    <img src="denis_assests/Cake.png" alt="торт">
+  </div>
+  <div class="el shadow-soft" id="cat-blue-hat">
+    <img src="denis_assests/animal_2.png" alt="">
+  </div>
+  <div class="el shadow-soft" id="hb-letters">
+    <img src="denis_assests/HB.png" alt="Happy Birthday">
+  </div>
+  <div class="el shadow-soft" id="chihuahua">
+    <img src="denis_assests/animal_4.png" alt="">
+  </div>
+  <div class="el shadow-soft" id="monkey-flowers">
+    <img src="denis_assests/animal_3.png" alt="">
+  </div>
+
+  <!-- FILM STRIP 1 -->
+  <div class="el" id="filmstrip1">
+    <div class="filmstrip-track">
+      <img src="denis_assests/gallery-1.png" alt="фото">
+    </div>
+    <div class="filmstrip-hint" id="filmstrip1-hint" aria-hidden="true">
+      <img class="filmstrip-hint-hand" src="denis_assests/hand_finger.png" alt="">
+    </div>
+  </div>
+  <div class="el shadow" id="star-badge">
+    <img src="denis_assests/star.png" alt="you are my lucky star">
+  </div>
+  <div class="el shadow" id="cat-sunglasses">
+    <img src="denis_assests/cat.png" alt="">
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="el" id="moscow-bg">
+    <img src="denis_assests/moscow_back.png" alt="">
+  </div>
+  <div class="el shadow" id="guf-guy" role="button" tabindex="0" aria-label="Послушать поздравление от Гуфа">
+    <img src="denis_assests/GUF.png" alt="Guf">
+    <img class="guf-mouth" src="denis_assests/guf-mounth.png" alt="">
+  </div>
+  <div class="el shadow" id="message">
+    <img src="denis_assests/message.png" alt="">
+    <p class="message-text" id="guf-line">Эй. Тыкни в меня.</p>
+  </div>
+  <div class="el shadow" id="star-lamp">
+    <img src="denis_assests/star_lamp.png" alt="">
+  </div>
+  <div class="el shadow" id="disco-lamp">
+    <img src="denis_assests/disco_lamp.png" alt="">
+  </div>
+
+  <div class="el" id="artem">
+    <img src="denis_assests/artem_denis.png" alt="">
+  </div>
+
+  <!-- SECTION 3 : film strips feed from Kodak bobbin, tuck under Artem -->
+  <div id="gallery2-section" aria-label="Фотоплёнка">
+    <div id="gallery2-pin">
+      <div id="gallery2-film-clip">
+        <div id="gallery2-films">
+          <img src="denis_assests/gallery-2.png" alt="фотоплёнка">
+        </div>
+      </div>
+      <div id="kodak-babine">
+        <img src="denis_assests/kodak-babine.png" alt="">
+      </div>
+    </div>
+  </div>
+
+  <div class="el shadow" id="video-frame">
+    <img src="denis_assests/video.png" alt="">
+    <div id="video-inner">▶</div>
+  </div>
+
+  <div class="el" id="footer-friends">
+    <img src="denis_assests/friend_FINAL_FOOTER.png" alt="друзья">
+  </div>
+
+</div>
+</div>
+
+<script>
+  var DESIGN_W = 480;
+  var stage = document.getElementById('stage');
+  var scene = document.getElementById('scene');
+  var footer = document.getElementById('footer-friends');
+  var lastStageW = 0;
+  var lastDesignH = 0;
+
+  function sizeScene() {
+    var w = stage.clientWidth || DESIGN_W;
+    var designH = footer.offsetTop + footer.offsetHeight;
+    if (w === lastStageW && designH === lastDesignH) return;
+    lastStageW = w;
+    lastDesignH = designH;
+    var scale = w / DESIGN_W;
+    scene.style.height = designH + 'px';
+    scene.style.transform = 'scale(' + scale + ')';
+    stage.style.height = (designH * scale) + 'px';
+  }
+
+  window.addEventListener('resize', sizeScene);
+  // Observe width only — watching #stage itself loops when we set its height
+  if (window.ResizeObserver) {
+    new ResizeObserver(sizeScene).observe(document.documentElement);
+  }
+  var footerImg = footer.querySelector('img');
+  if (footerImg && !footerImg.complete) {
+    footerImg.addEventListener('load', sizeScene);
+  }
+  sizeScene();
+
+  // Start balloons only after the image is decoded — avoids first-frame hitch
+  var balloons = document.getElementById('balloons');
+  var balloonsImg = balloons.querySelector('img');
+  function startBalloons() {
+    requestAnimationFrame(function () {
+      balloons.classList.add('is-ready');
+    });
+  }
+  if (balloonsImg && balloonsImg.decode) {
+    balloonsImg.decode().then(startBalloons).catch(startBalloons);
+  } else if (balloonsImg && !balloonsImg.complete) {
+    balloonsImg.addEventListener('load', startBalloons);
+  } else {
+    startBalloons();
+  }
+
+  // Reveal-on-scroll helpers
+  function revealWhenVisible(el, opts) {
+    if (!el) return;
+    opts = opts || {};
+    if (!('IntersectionObserver' in window)) {
+      el.classList.add('is-in');
+      return;
+    }
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        el.classList.add('is-in');
+        observer.disconnect();
+      });
+    }, {
+      threshold: opts.threshold != null ? opts.threshold : 0.3,
+      rootMargin: opts.rootMargin || '0px 0px -8% 0px'
+    });
+    observer.observe(el);
+  }
+
+  revealWhenVisible(document.getElementById('cake'));
+  revealWhenVisible(document.getElementById('hb-letters'));
+  revealWhenVisible(document.getElementById('star-badge'), { threshold: 0.2 });
+  revealWhenVisible(document.getElementById('cat-sunglasses'), { threshold: 0.2 });
+  revealWhenVisible(document.getElementById('message'), { threshold: 0.25 });
+  revealWhenVisible(document.getElementById('disco-lamp'), { threshold: 0.2 });
+
+  // GUF talks: click cycles birthday lines in the bubble
+  (function setupGufTalk() {
+    var guf = document.getElementById('guf-guy');
+    var message = document.getElementById('message');
+    var lineEl = document.getElementById('guf-line');
+    var talkTimer = null;
+    var busy = false;
+    var idx = 0;
+
+    var lines = [
+      "Дениска, братишка... двадцатка. Это уже серьёзно.",
+      "Двадцать лет — как шестой этаж, но на четырнадцать повыше.",
+      "С днюхой. Качели качнулись в нужную сторону.",
+      "Мне тоже могли дать двацатку, но 20 тебе!",
+      "Для тех, кто в теме: у Дениса сегодня юбилейчик.",
+      "Взрослые много душнят",
+      "Сверху видно всё... особенно торт. С праздником.",
+      "Денис, ты жутко годный. Это комплимент, если что.",
+      "Двадцать позади — впереди куча историй под бит.",
+      "Братишка, зажигай. Только аккуратно, я рядом стою.",
+      "Поздравляю. Коротко. Искренне. По-братски.",
+      "Сегодня можно всё. Завтра тоже, но сегодня — особенно.",
+      "Держи курс, Денис. Дым пускай только праздничный.",
+      "Не ice baby — Denis baby. С двадцаткой!",
+      "Ты не постарел — просто сезон сменился. С днюхой.",
+      "Если б я писал трек про тебя — был бы хит. Точно.",
+      "Двадцать — уже не шутки. Но мы пошутим anyway.",
+      "Дениска, обнял-приподнял. С днём рождения, брат.",
+      "Москва за окном\nторт на столе\nА двадцать тебе\nСет.",
+      "Повторять не буду: ты красавчик. С днюхой, Денис."
+    ];
+
+    function startTalking() {
+      guf.classList.add('is-talking');
+      guf.classList.remove('is-pulse');
+      clearTimeout(talkTimer);
+      talkTimer = setTimeout(function () {
+        guf.classList.remove('is-talking');
+      }, 1300);
+    }
+
+    function sayNext() {
+      if (busy) return;
+      busy = true;
+      message.classList.add('is-in');
+      startTalking();
+
+      lineEl.classList.add('is-out');
+      setTimeout(function () {
+        lineEl.textContent = lines[idx];
+        idx = (idx + 1) % lines.length;
+        // force reflow so fade-in plays even if same node
+        void lineEl.offsetWidth;
+        lineEl.classList.remove('is-out');
+        setTimeout(function () { busy = false; }, 220);
+      }, 280);
+    }
+
+    guf.addEventListener('click', sayNext);
+    guf.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        sayNext();
+      }
+    });
+
+    // Soft pulse hint once GUF is on screen
+    if ('IntersectionObserver' in window) {
+      var gufHint = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          if (idx === 0 && !guf.classList.contains('is-talking')) {
+            guf.classList.add('is-pulse');
+          }
+          gufHint.disconnect();
+        });
+      }, { threshold: 0.35 });
+      gufHint.observe(guf);
+    }
+  })();
+
+  // Filmstrip: horizontal pan (custom — works inside scaled scene)
+  (function setupFilmstrip() {
+    var wrap = document.getElementById('filmstrip1');
+    var track = wrap.querySelector('.filmstrip-track');
+    var hint = document.getElementById('filmstrip1-hint');
+    var x = 0;
+    var startClientX = 0;
+    var startClientY = 0;
+    var startX = 0;
+    var active = false;
+    var axis = null; // 'x' | 'y'
+    var nudged = false;
+
+    function sceneScale() {
+      return (stage.clientWidth || DESIGN_W) / DESIGN_W;
+    }
+
+    function maxOffset() {
+      return Math.max(0, track.offsetWidth - wrap.clientWidth);
+    }
+
+    function setX(next) {
+      var max = maxOffset();
+      x = Math.min(0, Math.max(-max, next));
+      track.style.transform = 'translate3d(' + x + 'px,0,0)';
+    }
+
+    function hideHint() {
+      if (!hint || hint.classList.contains('is-hidden')) return;
+      hint.classList.add('is-hidden');
+    }
+
+    function onPointerDown(e) {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      active = true;
+      axis = null;
+      startClientX = e.clientX;
+      startClientY = e.clientY;
+      startX = x;
+    }
+
+    function onPointerMove(e) {
+      if (!active) return;
+      var dxScreen = e.clientX - startClientX;
+      var dyScreen = e.clientY - startClientY;
+      if (!axis) {
+        if (Math.abs(dxScreen) < 7 && Math.abs(dyScreen) < 7) return;
+        axis = Math.abs(dxScreen) > Math.abs(dyScreen) ? 'x' : 'y';
+        if (axis === 'x') {
+          wrap.setPointerCapture(e.pointerId);
+          wrap.classList.add('is-dragging');
+          hideHint();
+        } else {
+          active = false;
+        }
+      }
+      if (axis !== 'x') return;
+      e.preventDefault();
+      setX(startX + dxScreen / sceneScale());
+    }
+
+    function onPointerUp(e) {
+      if (!active && axis !== 'x') return;
+      active = false;
+      wrap.classList.remove('is-dragging');
+      try { wrap.releasePointerCapture(e.pointerId); } catch (err) {}
+      axis = null;
+    }
+
+    wrap.addEventListener('pointerdown', onPointerDown);
+    wrap.addEventListener('pointermove', onPointerMove);
+    wrap.addEventListener('pointerup', onPointerUp);
+    wrap.addEventListener('pointercancel', onPointerUp);
+
+    // Demo nudge when strip enters view — shows it can scroll
+    function playNudge() {
+      if (nudged) return;
+      nudged = true;
+      var max = maxOffset();
+      if (max < 8) return;
+      var target = -Math.min(72, max * 0.12);
+      track.style.transition = 'transform 0.55s cubic-bezier(0.22, 1, 0.36, 1)';
+      setX(target);
+      setTimeout(function () {
+        setX(0);
+        setTimeout(function () {
+          track.style.transition = '';
+        }, 560);
+      }, 700);
+    }
+
+    if ('IntersectionObserver' in window) {
+      var stripObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          playNudge();
+          stripObserver.disconnect();
+        });
+      }, { threshold: 0.4 });
+      stripObserver.observe(wrap);
+    }
+
+    var stripImg = track.querySelector('img');
+    if (stripImg && !stripImg.complete) {
+      stripImg.addEventListener('load', function () { setX(x); });
+    }
+  })();
+
+  // Soft scroll parallax for Artem / Denis photo
+  (function setupArtemParallax() {
+    var artem = document.getElementById('artem');
+    if (!artem) return;
+    var img = artem.querySelector('img');
+    if (!img) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    var ticking = false;
+    var RANGE = 72; // design-px shift each way
+
+    function update() {
+      ticking = false;
+      var rect = artem.getBoundingClientRect();
+      var vh = window.innerHeight || 1;
+      if (rect.bottom < -80 || rect.top > vh + 80) return;
+      var progress = (vh - rect.top) / (vh + rect.height);
+      progress = Math.min(1, Math.max(0, progress));
+      var shift = (0.5 - progress) * RANGE * 2;
+      img.style.transform = 'translate3d(0,' + shift.toFixed(2) + 'px,0)';
+    }
+
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    update();
+  })();
+
+  // Gallery-2: pin a film viewport and scrub the continuous strip
+  (function setupGallery2Feeder() {
+    var section = document.getElementById('gallery2-section');
+    var pin = document.getElementById('gallery2-pin');
+    var clip = document.getElementById('gallery2-film-clip');
+    var films = document.getElementById('gallery2-films');
+    var bobbin = document.getElementById('kodak-babine');
+    if (!section || !pin || !clip || !films || !bobbin) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    var filmImg = films.querySelector('img');
+    var bobbinImg = bobbin.querySelector('img');
+    var ticking = false;
+    var TOP_PAD = 16;
+    var prevProgress = 0;
+    var rockAngle = 0;
+
+    function sceneScale() {
+      return (stage.clientWidth || DESIGN_W) / DESIGN_W;
+    }
+
+    function update() {
+      ticking = false;
+      var scale = sceneScale();
+      // pin matches the visible viewport height
+      var pinH = Math.max(480, window.innerHeight / scale);
+      pin.style.height = pinH + 'px';
+
+      // hang lower half under the fold — it becomes visible as the section scrolls on
+      var bobbinH = bobbin.offsetHeight || 280;
+      var hang = bobbinH * 0.52;
+      bobbin.style.bottom = (-hang) + 'px';
+
+      // film disappears into the visible (upper) half of the bobbin
+      var bobbinCut = Math.max(36, bobbinH * 0.5 - hang);
+      clip.style.bottom = bobbinCut + 'px';
+
+      var sectionTop = section.offsetTop;
+      var sectionH = section.offsetHeight;
+      var maxPin = Math.max(0, sectionH - pinH);
+      var scrollDesign = (-stage.getBoundingClientRect().top) / scale;
+      var pinY = Math.min(Math.max(scrollDesign - sectionTop, 0), maxPin);
+      pin.style.transform = 'translate3d(0,' + pinY + 'px,0)';
+
+      var progress = maxPin > 0 ? pinY / maxPin : 0;
+      var visible = Math.max(160, pinH - bobbinCut - TOP_PAD);
+      var chainH = films.offsetHeight;
+      // tip already at the bobbin mouth — photos start feeding out immediately
+      var park = Math.max(24, visible - 12);
+      var travel = Math.max(0, chainH - visible);
+      var y = park * (1 - progress) - travel * progress;
+      films.style.transform = 'translate3d(0,' + y.toFixed(2) + 'px,0)';
+
+      // gentle unwind wobble while scrubbing the film
+      var delta = progress - prevProgress;
+      prevProgress = progress;
+      var unwind = Math.sin(progress * Math.PI * 14) * 3.4;
+      var tug = Math.max(-2.5, Math.min(2.5, delta * 90));
+      rockAngle += (unwind + tug - rockAngle) * 0.4;
+      var bounce = Math.sin(progress * Math.PI * 14 + 0.9) * 1.8;
+      bobbin.style.transform =
+        'translateX(-50%) translateY(' + bounce.toFixed(2) + 'px) rotate(' + rockAngle.toFixed(2) + 'deg)';
+    }
+
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+
+    function ready() {
+      sizeScene();
+      update();
+    }
+
+    var pending = 2;
+    function onAsset() {
+      pending -= 1;
+      if (pending <= 0) ready();
+    }
+    if (filmImg && !filmImg.complete) {
+      filmImg.addEventListener('load', onAsset, { once: true });
+      filmImg.addEventListener('error', onAsset, { once: true });
+    } else {
+      onAsset();
+    }
+    if (bobbinImg && !bobbinImg.complete) {
+      bobbinImg.addEventListener('load', onAsset, { once: true });
+      bobbinImg.addEventListener('error', onAsset, { once: true });
+    } else {
+      onAsset();
+    }
+    update();
+  })();
+</script>
+</body>
+</html>
