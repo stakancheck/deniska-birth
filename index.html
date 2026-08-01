@@ -17,6 +17,135 @@
     display: flex;
     justify-content: center;
   }
+  body.is-booting {
+    overflow: hidden;
+    height: 100%;
+  }
+
+  /* ---------- BOOT LOADER (Windows classic / XP) ---------- */
+  #boot-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: #008080;
+    transition: opacity 0.45s ease, visibility 0.45s ease;
+  }
+  #boot-loader.is-done {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .xp-window {
+    width: min(360px, 100%);
+    background: #d4d0c8;
+    color: #000;
+    border: 2px solid;
+    border-color: #fff #404040 #404040 #fff;
+    box-shadow: 1px 1px 0 #000, 2px 2px 8px rgba(0,0,0,.35);
+    font-family: Tahoma, "MS Sans Serif", "Segoe UI", sans-serif;
+    font-size: 11px;
+  }
+  .xp-titlebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 2px;
+    padding: 3px 4px 3px 6px;
+    background: linear-gradient(90deg, #000080 0%, #1084d0 100%);
+    color: #fff;
+    font-weight: 700;
+    user-select: none;
+  }
+  .xp-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .xp-close {
+    flex: 0 0 21px;
+    width: 21px;
+    height: 21px;
+    padding: 0;
+    border: 2px solid;
+    border-color: #fff #404040 #404040 #fff;
+    background: #d4d0c8;
+    color: #000;
+    font: 700 12px/1 Tahoma, sans-serif;
+    cursor: default;
+  }
+  .xp-close:active {
+    border-color: #404040 #fff #fff #404040;
+  }
+  .xp-body {
+    padding: 18px 16px 14px;
+  }
+  .xp-loading-label {
+    text-align: center;
+    margin-bottom: 8px;
+    font-size: 12px;
+  }
+  .xp-sound-warn {
+    text-align: center;
+    margin-bottom: 14px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #000080;
+  }
+  .xp-progress {
+    display: flex;
+    gap: 2px;
+    height: 20px;
+    padding: 2px;
+    margin: 0 4px 16px;
+    background: #fff;
+    border: 2px solid;
+    border-color: #808080 #fff #fff #808080;
+    box-shadow: inset 1px 1px 0 #404040;
+  }
+  .xp-seg {
+    flex: 1 1 0;
+    min-width: 0;
+    background: transparent;
+  }
+  .xp-seg.is-on {
+    background: #000080;
+  }
+  .xp-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+  }
+  .xp-btn {
+    min-width: 75px;
+    height: 23px;
+    padding: 0 10px;
+    border: 2px solid;
+    border-color: #fff #404040 #404040 #fff;
+    background: #d4d0c8;
+    color: #000;
+    font: 11px/1 Tahoma, "MS Sans Serif", sans-serif;
+    box-shadow: 1px 1px 0 #000;
+    cursor: default;
+  }
+  .xp-btn:active:not(:disabled) {
+    border-color: #404040 #fff #fff #404040;
+    box-shadow: none;
+    padding-top: 1px;
+    padding-left: 11px;
+  }
+  .xp-btn:disabled {
+    color: #808080;
+    text-shadow: 1px 1px 0 #fff;
+  }
+  .xp-btn.is-focus {
+    outline: 1px dotted #000;
+    outline-offset: -5px;
+  }
 
   /*
     Fixed artboard (480×3936). Everything is laid out in px relative to that
@@ -29,6 +158,11 @@
     max-width: 480px;
     overflow: hidden;
     background: #EDE7D3;
+    opacity: 0;
+    transition: opacity 0.45s ease;
+  }
+  #stage.is-ready {
+    opacity: 1;
   }
 
   #scene {
@@ -585,7 +719,32 @@
   }
 </style>
 </head>
-<body>
+<body class="is-booting">
+
+<div id="boot-loader" aria-live="polite" aria-busy="true">
+  <div class="xp-window" role="dialog" aria-label="Loading">
+    <div class="xp-titlebar">
+      <span class="xp-title">Loading...</span>
+      <button class="xp-close" type="button" aria-label="Close" tabindex="-1">×</button>
+    </div>
+    <div class="xp-body">
+      <div class="xp-loading-label" id="boot-label">Loading...</div>
+      <div class="xp-sound-warn">⚠ Включите звук</div>
+      <div
+        class="xp-progress"
+        id="boot-bar"
+        role="progressbar"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow="0"
+      ></div>
+      <div class="xp-buttons">
+        <button type="button" class="xp-btn is-focus" id="boot-done" disabled>Done</button>
+        <button type="button" class="xp-btn" id="boot-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div id="stage">
 <div id="scene">
@@ -728,21 +887,181 @@
   }
   sizeScene();
 
-  // Start balloons only after the image is decoded — avoids first-frame hitch
   var balloons = document.getElementById('balloons');
-  var balloonsImg = balloons.querySelector('img');
   function startBalloons() {
     requestAnimationFrame(function () {
       balloons.classList.add('is-ready');
     });
   }
-  if (balloonsImg && balloonsImg.decode) {
-    balloonsImg.decode().then(startBalloons).catch(startBalloons);
-  } else if (balloonsImg && !balloonsImg.complete) {
-    balloonsImg.addEventListener('load', startBalloons);
-  } else {
-    startBalloons();
-  }
+
+  // Preload images + music, then wait for Done (user gesture unlocks audio)
+  (function bootPreload() {
+    var loader = document.getElementById('boot-loader');
+    var bar = document.getElementById('boot-bar');
+    var label = document.getElementById('boot-label');
+    var doneBtn = document.getElementById('boot-done');
+    var cancelBtn = document.getElementById('boot-cancel');
+    var closeBtn = loader ? loader.querySelector('.xp-close') : null;
+    var urls = {};
+    var SEGMENTS = 18;
+    var MUSIC_SRC = 'denis_assests/irina-allegrova-s-dnem-rozhdenija.mp3';
+
+    var music = new Audio();
+    music.preload = 'auto';
+    music.loop = true;
+    music.src = MUSIC_SRC;
+
+    if (bar) {
+      for (var s = 0; s < SEGMENTS; s++) {
+        var seg = document.createElement('span');
+        seg.className = 'xp-seg';
+        bar.appendChild(seg);
+      }
+    }
+
+    function addUrl(url) {
+      if (!url) return;
+      try { url = new URL(url, window.location.href).href; } catch (e) {}
+      urls[url] = true;
+    }
+
+    addUrl('denis_assests/back_dash.png');
+    document.querySelectorAll('img[src]').forEach(function (img) {
+      addUrl(img.getAttribute('src'));
+    });
+
+    var list = Object.keys(urls);
+    var total = list.length + 1; // images + music
+    var done = 0;
+    var revealed = false;
+    var loadComplete = false;
+
+    function setProgress() {
+      var pct = Math.min(100, Math.round((done / total) * 100));
+      var filled = Math.round((done / total) * SEGMENTS);
+      if (bar) {
+        bar.setAttribute('aria-valuenow', String(pct));
+        var segs = bar.children;
+        for (var i = 0; i < segs.length; i++) {
+          if (i < filled) segs[i].classList.add('is-on');
+          else segs[i].classList.remove('is-on');
+        }
+      }
+    }
+
+    function playMusic() {
+      var playPromise = music.play();
+      if (playPromise && playPromise.catch) {
+        playPromise.catch(function () {
+          // if still blocked, retry on first tap inside the card
+          var unlock = function () {
+            music.play().catch(function () {});
+            document.removeEventListener('pointerdown', unlock, true);
+          };
+          document.addEventListener('pointerdown', unlock, true);
+        });
+      }
+    }
+
+    function readyToOpen() {
+      if (loadComplete) return;
+      loadComplete = true;
+      if (label) label.textContent = 'Ready.';
+      if (doneBtn) {
+        doneBtn.disabled = false;
+        try { doneBtn.focus(); } catch (e) {}
+      }
+    }
+
+    // decorative XP chrome — Cancel / Close don't abort preload
+    function xpBeep(e) {
+      if (e) e.preventDefault();
+    }
+    if (cancelBtn) cancelBtn.addEventListener('click', xpBeep);
+    if (closeBtn) closeBtn.addEventListener('click', xpBeep);
+    if (doneBtn) {
+      doneBtn.addEventListener('click', function () {
+        if (doneBtn.disabled) return;
+        playMusic();
+        reveal();
+      });
+    }
+
+    function reveal() {
+      if (revealed) return;
+      revealed = true;
+      function show() {
+        lastStageW = 0;
+        lastDesignH = 0;
+        sizeScene();
+        stage.classList.add('is-ready');
+        document.body.classList.remove('is-booting');
+        if (loader) {
+          loader.classList.add('is-done');
+          loader.setAttribute('aria-busy', 'false');
+        }
+        startBalloons();
+        setTimeout(function () {
+          if (loader && loader.parentNode) loader.parentNode.removeChild(loader);
+        }, 700);
+      }
+      var fontsReady = (document.fonts && document.fonts.ready)
+        ? document.fonts.ready.catch(function () {})
+        : Promise.resolve();
+      fontsReady.then(show);
+    }
+
+    function tick() {
+      done += 1;
+      setProgress();
+      if (done >= total) readyToOpen();
+    }
+
+    list.forEach(function (url) {
+      var img = new Image();
+      var settled = false;
+      function finishOk() {
+        if (settled) return;
+        settled = true;
+        if (img.decode) {
+          img.decode().then(tick).catch(tick);
+        } else {
+          tick();
+        }
+      }
+      function finishErr() {
+        if (settled) return;
+        settled = true;
+        tick();
+      }
+      img.onload = finishOk;
+      img.onerror = finishErr;
+      img.src = url;
+      if (img.complete) {
+        if (img.naturalWidth > 0) finishOk();
+        else finishErr();
+      }
+    });
+
+    var musicSettled = false;
+    function finishMusic() {
+      if (musicSettled) return;
+      musicSettled = true;
+      tick();
+    }
+    music.addEventListener('canplaythrough', finishMusic);
+    music.addEventListener('error', finishMusic);
+    try { music.load(); } catch (e) { finishMusic(); }
+
+    // safety net — unlock Done even if something hangs
+    setTimeout(function () {
+      if (!loadComplete) {
+        done = total;
+        setProgress();
+        readyToOpen();
+      }
+    }, 45000);
+  })();
 
   // Reveal-on-scroll helpers
   function revealWhenVisible(el, opts) {
